@@ -1,0 +1,100 @@
+
+    <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+ 
+      <title>Arbitrage viewer</title>
+ 
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.2.3/css/bulma.min.css">
+      <script src="external/jquery/jquery.js"></script>
+      <script src="jquery-ui.min.js"></script>
+
+
+
+	<script>
+    	function copyDivToClipboard() {
+        	var range = window.getSelection().getRangeAt(0);
+        	range.selectNode(document.getElementById("a"));
+        	window.getSelection().addRange(range);
+        	document.execCommand("copy")
+    	}
+	
+	function WinOpen() {
+		  var url=document.crypto_dropdown.currency.value;
+	          document.location.href=url;
+
+	}
+
+	
+	</script>
+
+</head>
+<body>
+ 
+    <div class="container">
+        <div class="section columns">
+            <div class="column is-8 is-offset-2">
+	
+		 <label>Select currency:</label>   
+		 <form name='crypto_dropdown'>
+		 <select name="currency">
+			    <option value="/?currency=BTC">BTC</option>
+			    <option value="/?currency=ETH">ETH</option>
+			    <option value="/?currency=XRP">XRP</option>
+		 </select> 
+		 <input type="button" onClick="WinOpen();" value="Change">
+		 </form>
+
+		<h2 class="title is-5 has-text-centered">
+                      Exchange rate: {{ result.exchange }}*
+                  </h2>
+
+		<table class="table">
+ 		 <thead>
+    			<tr>
+      				<th></th>
+				<th><abbr>Bitstamp</abbr></th>
+      				<th><abbr>Luno</abbr></th>
+      				<th><abbr>CEX.IO</abbr></th>    
+    			</tr>
+  		</thead>  
+  		<tbody>
+    			<tr>
+				<th><abbr>Bitstamp</abbr></th> 
+     				<td> <strong>X</strong> </td>
+      				<td style="color:green; font-weight: bold;"> {{ result.BS_LUNO_percentage }}% </td>
+      				<td style="color:green; font-weight: bold;"> {{ result.BS_CEX_percentage }}% </td>
+    			</tr>
+    			<tr>
+				<th><abbr>Luno</abbr></th>
+      				<td style="color:red; font-weight: bold;"> {{ result.LUNO_BS_percentage }}% </td>
+      				<td> <strong>X</strong> </td>
+      				<td style="color:red; font-weight: bold;"> {{ result.LUNO_CEX_percentage }}% </td>
+    			</tr>
+    			<tr>
+				<th><abbr>CEX.IO</abbr></th>
+      				<td style="color:red; font-weight: bold;"> {{ result.CEX_BS_percentage }}% </td>
+      				<td style="color:green; font-weight: bold;"> {{ result.CEX_LUNO_percentage }}% </td>
+    				<td> <strong>X</strong> </td>
+			</tr>    
+  		</tbody>
+		</table>
+		<br/>
+		<div class="has-text-centered">Donations welcome (click to copy):</div>
+		<div class="has-text-centered" id="a" onclick="copyDivToClipboard()">14VXGBXeMD7aFaKPAUovb3hH5eHUffNfqG</div>
+		<br/>
+                <p class="has-text-centered">*Exchange rate is an industry average, your bank may mark this up by 5-10% for USD transfer purchases. All arbitrage rates include exchange fees and wire transfers but <strong>not</strong> credit card deposit fees.</p>
+		<br/>
+		<p><strong>Top tips:</strong></p>
+		 <ol>
+    			<li>Luno -> CEX and then withdrawal to offshore account can be an interesting way to get money out of SA without incurring Single Discretionary Allowance (SDA).</li>
+			<li>If CEX -> Luno exceeds 8.5% or so, credit card deposit on CEX and arbitrage on Luno is an option (their deposit fee is 3.5% compared to Bitstamps 5%) so anything north of that is profitable.</li>
+    			<li>Bitstamp -> CEX, withdrawal to offshore account, and deposit back into Bitstamp is a nice loop overseas without incurring SDA.</li>
+			<li>Bitstamp -> Luno seems to be stock standard highest margins. Watch for compression and lagg (Luno activity about 2-4 hours trailing overseas exchanges). Sweet spot is when overseas prices drop quickly, will add some indicators to predict this soon.</li>
+  		</ol>
+
+        </div>
+    </div>
+ 
+</body>
+</html>

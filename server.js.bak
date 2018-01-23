@@ -1,0 +1,81 @@
+'use strict'
+ 
+const Hapi = require('hapi');
+const Request = require('request');
+const Vision = require('vision');
+const Handlebars = require('handlebars');
+const LodashFilter = require('lodash.filter');
+const LodashTake = require('lodash.take');
+
+const server = new Hapi.Server();
+ 
+server.connection({
+    port: 8080
+});
+
+ 
+// Register vision for our views
+server.register(Vision, (err) => {
+    server.views({
+        engines: {
+            html: Handlebars
+        },
+        relativeTo: __dirname,
+        path: './views',
+    });
+});
+
+server.route({
+    method: 'GET',
+    path: '/',
+    handler: function (request, reply) {
+   
+	var ask1 = new Object();
+	var ask2 = new Object();
+	var output = new Object();
+
+
+        Request.get('https://www.bitstamp.net/api/ticker/', function (error, response, body) {
+            if (error) {
+                throw error;
+            }
+ 
+            const data = JSON.parse(body);
+    	    ask1 = { bitstampAsk: data.ask };        
+	});
+
+	Request.get('https://api.mybitx.com/api/1/ticker?pair=XBTZAR', function (error, response, body) {
+            if (error) {
+                throw error;
+            }
+
+            const data2 = JSON.parse(body);
+            ask2 = { lunoAsk: data2.ask };
+
+
+            output = Object.assign(ask1, ask2);
+
+	    console.log('Output: %j', output);
+   	   // reply.view('index', { result: output });
+
+        }); 
+
+
+   }
+});
+
+
+
+ 
+// A simple helper function that extracts price from bitstamp API
+Handlebars.registerHelper('bitstampPrice', function (teamUrl) {
+    return teamUrl.slice(38);
+});
+
+server.start((err) => {
+    if (err) {
+        throw err;
+    }
+ 
+    console.log(`Server running at: ${server.info.uri}`);
+});
