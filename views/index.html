@@ -6,9 +6,6 @@
       <title>Arbitrage viewer</title>
  
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.2.3/css/bulma.min.css">
-      <script src="external/jquery/jquery.js"></script>
-      <script src="jquery-ui.min.js"></script>
-
 
 
 	<script>
@@ -20,80 +17,193 @@
     	}
 	
 	function WinOpen() {
-		  var url=document.crypto_dropdown.currency.value;
+		  var url=document.fiat_dropdown.fiat_currency.value + document.crypto_dropdown.crypto_currency.value;
 	          document.location.href=url;
 
 	}
 
-	
+        if(location.href.indexOf('fiat_currency') == -1){
+		document.location.href='/?fiat_currency=EUR&crypto_currency=BTC';
+	}
+
 	</script>
 
 </head>
 <body>
  
-    <div class="container">
+    <div class="container has-text-centered">
         <div class="section columns">
             <div class="column is-8 is-offset-2">
 	
-		 <label>Select currency:</label>   
-		 <form name='crypto_dropdown'>
-		 <select name="currency">
-			    <option value="/?currency=BTC">BTC</option>
-			    <option value="/?currency=ETH">ETH</option>
-			    <option value="/?currency=XRP">XRP</option>
+		 <form name='fiat_dropdown'>
+		 <label class="title is-5">Select Fiat currency:</label>   
+		 <select name="fiat_currency"  onChange="WinOpen();"> 
+			 	<script>
+					if(location.search.split('fiat_currency=')[1].split('&')[0] == 'USD'){
+						document.write('<option value="/?fiat_currency=USD" selected="selected">USD</option>');
+				       	}
+					else{
+						document.write('<option value="/?fiat_currency=USD">USD</option>');
+					}
+				</script>
+		 		<script>
+					if(location.search.split('fiat_currency=')[1].split('&')[0] == 'EUR'){
+						document.write('<option value="/?fiat_currency=EUR" selected="selected">EUR</option>');
+				       	}
+					else{
+						document.write('<option value="/?fiat_currency=EUR">EUR</option>');
+					}
+				</script>
 		 </select> 
-		 <input type="button" onClick="WinOpen();" value="Change">
 		 </form>
 
-		<h2 class="title is-5 has-text-centered">
-                      Exchange rate: {{ result.exchange }}*
-                  </h2>
+	
+		 <form name='crypto_dropdown'>
+		 <label class="title is-5">Select Crypto currency:</label>   
+		 <select name="crypto_currency" onChange="WinOpen();">
+			 	<script>
+					if(location.search.split('crypto_currency=')[1] == 'BTC'){
+						document.write('<option value="&crypto_currency=BTC" selected="selected">BTC</option>');
+				       	}
+					else{
+						document.write('<option value="&crypto_currency=BTC">BTC</option>');
+					}
+				</script>
+			   	<script>
+					if(location.search.split('crypto_currency=')[1] == 'ETH'){
+						document.write('<option value="&crypto_currency=ETH" selected="selected">ETH</option>');
+				       	}
+					else{
+						document.write('<option value="&crypto_currency=ETH">ETH</option>');
+					}
+				</script>
+				<script>
+					if(location.search.split('crypto_currency=')[1] == 'XRP'){
+						document.write('<option value="&crypto_currency=XRP" selected="selected">XRP</option>');
+				       	}
+					else{
+						document.write('<option value="&crypto_currency=XRP">XRP</option>');
+					}
+				</script>
+
+		 </select> 
+		 </form>
 
 		<table class="table">
  		 <thead>
     			<tr>
       				<th></th>
 				<th><abbr>Bitstamp</abbr></th>
-      				<th><abbr>Luno</abbr></th>
-      				<th><abbr>CEX.IO</abbr></th>    
-    			</tr>
+				{{#ifLunoCurrency}}
+				<th><abbr>Luno*</abbr></th>
+				{{/ifLunoCurrency}}
+				<th><abbr>CEX.IO</abbr></th>    
+    				{{#ifDsxCurrency}}
+				<th><abbr>DSX</abbr></th>
+				{{/ifDsxCurrency}}
+			</tr>
   		</thead>  
   		<tbody>
     			<tr>
 				<th><abbr>Bitstamp</abbr></th> 
      				<td> <strong>X</strong> </td>
-      				<td style="color:green; font-weight: bold;"> {{ result.BS_LUNO_percentage }}% </td>
-      				<td style="color:green; font-weight: bold;"> {{ result.BS_CEX_percentage }}% </td>
-    			</tr>
-    			<tr>
-				<th><abbr>Luno</abbr></th>
-      				<td style="color:red; font-weight: bold;"> {{ result.LUNO_BS_percentage }}% </td>
-      				<td> <strong>X</strong> </td>
-      				<td style="color:red; font-weight: bold;"> {{ result.LUNO_CEX_percentage }}% </td>
-    			</tr>
-    			<tr>
+				{{#ifLunoCurrency}}
+					{{#ifIsZero result.BS_LUNO_percentage }}			
+						<td style="color:green; font-weight: bold;"> {{ result.BS_LUNO_percentage }}% </td>
+						{{else}}
+						<td style="color:red; font-weight: bold;"> {{ result.BS_LUNO_percentage }}% </td>
+						{{/ifIsZero}}
+				{{/ifLunoCurrency}}
+				{{#ifIsZero result.BS_CEX_percentage }}			
+				<td style="color:green; font-weight: bold;"> {{ result.BS_CEX_percentage }}% </td>
+				{{else}}
+				<td style="color:red; font-weight: bold;"> {{ result.BS_CEX_percentage }}% </td>
+				{{/ifIsZero}}
+				{{#ifDsxCurrency}}
+					{{#ifIsZero result.BS_DSX_percentage }}			
+					<td style="color:green; font-weight: bold;"> {{ result.BS_DSX_percentage }}% </td>
+					{{else}}
+					<td style="color:red; font-weight: bold;"> {{ result.BS_DSX_percentage }}% </td>
+					{{/ifIsZero}}
+				{{/ifDsxCurrency}}
+			</tr>
+			{{#ifLunoCurrency}}
+			<tr>
+				<th><abbr>Luno*</abbr></th>
+      				{{#ifIsZero result.LUNO_BS_percentage }}			
+				<td style="color:green; font-weight: bold;"> {{ result.LUNO_BS_percentage }}% </td>
+				{{else}}
+				<td style="color:red; font-weight: bold;"> {{ result.LUNO_BS_percentage }}% </td>
+				{{/ifIsZero}}
+				<td> <strong>X</strong> </td>
+    				{{#ifIsZero result.LUNO_CEX_percentage }}			
+				<td style="color:green; font-weight: bold;"> {{ result.LUNO_CEX_percentage }}% </td>
+				{{else}}
+				<td style="color:red; font-weight: bold;"> {{ result.LUNO_CEX_percentage }}% </td>
+				{{/ifIsZero}}
+				{{#ifIsZero result.LUNO_DSX_percentage }}			
+				<td style="color:green; font-weight: bold;"> {{ result.LUNO_DSX_percentage }}% </td>
+				{{else}}
+				<td style="color:red; font-weight: bold;"> {{ result.LUNO_DSX_percentage }}% </td>
+				{{/ifIsZero}}
+			</tr>
+			{{/ifLunoCurrency}}
+			<tr>
 				<th><abbr>CEX.IO</abbr></th>
-      				<td style="color:red; font-weight: bold;"> {{ result.CEX_BS_percentage }}% </td>
-      				<td style="color:green; font-weight: bold;"> {{ result.CEX_LUNO_percentage }}% </td>
-    				<td> <strong>X</strong> </td>
+      				{{#ifIsZero result.CEX_BS_percentage }}			
+				<td style="color:green; font-weight: bold;"> {{ result.CEX_BS_percentage }}% </td>
+				{{else}}
+				<td style="color:red; font-weight: bold;"> {{ result.CEX_BS_percentage }}% </td>
+				{{/ifIsZero}}
+				{{#ifLunoCurrency}}
+					{{#ifIsZero result.CEX_LUNO_percentage }}			
+					<td style="color:green; font-weight: bold;"> {{ result.CEX_LUNO_percentage }}% </td>
+					{{else}}
+					<td style="color:red; font-weight: bold;"> {{ result.CEX_LUNO_percentage }}% </td>
+					{{/ifIsZero}}
+				{{/ifLunoCurrency}}
+				<td> <strong>X</strong> </td>
+				{{#ifDsxCurrency}}
+					{{#ifIsZero result.CEX_DSX_percentage }}			
+					<td style="color:green; font-weight: bold;"> {{ result.CEX_DSX_percentage }}% </td>
+					{{else}}
+					<td style="color:red; font-weight: bold;"> {{ result.CEX_DSX_percentage }}% </td>
+					{{/ifIsZero}}
+				{{/ifDsxCurrency}}
 			</tr>    
-  		</tbody>
+			{{#ifDsxCurrency}}
+  			<tr>
+				<th><abbr>DSX</abbr></th>
+      				{{#ifIsZero result.DSX_BS_percentage }}			
+				<td style="color:green; font-weight: bold;"> {{ result.DSX_BS_percentage }}% </td>
+				{{else}}
+				<td style="color:red; font-weight: bold;"> {{ result.DSX_BS_percentage }}% </td>
+				{{/ifIsZero}}
+				{{#ifLunoCurrency}}
+					{{#ifIsZero result.DSX_LUNO_percentage }}			
+					<td style="color:green; font-weight: bold;"> {{ result.DSX_LUNO_percentage }}% </td>
+					{{else}}
+					<td style="color:red; font-weight: bold;"> {{ result.DSX_LUNO_percentage }}% </td>
+					{{/ifIsZero}}
+				{{/ifLunoCurrency}}
+     				{{#ifIsZero result.DSX_CEX_percentage }}			
+				<td style="color:green; font-weight: bold;"> {{ result.DSX_CEX_percentage }}% </td>
+				{{else}}
+				<td style="color:red; font-weight: bold;"> {{ result.DSX_CEX_percentage }}% </td>
+				{{/ifIsZero}}
+				<td> <strong>X</strong> </td>
+			</tr> 
+			{{/ifDsxCurrency}}
+		</tbody>
 		</table>
 		<br/>
-		<div class="has-text-centered">Donations welcome (click to copy):</div>
-		<div class="has-text-centered" id="a" onclick="copyDivToClipboard()">14VXGBXeMD7aFaKPAUovb3hH5eHUffNfqG</div>
+		Please donate 10% of what you make from this to any of <a href="http://bithope.org/campaigns">these</a> fine initiatives!
 		<br/>
-                <p class="has-text-centered">*Exchange rate is an industry average, your bank may mark this up by 5-10% for USD transfer purchases. All arbitrage rates include exchange fees and wire transfers but <strong>not</strong> credit card deposit fees.</p>
 		<br/>
-		<p><strong>Top tips:</strong></p>
-		 <ol>
-    			<li>Luno -> CEX and then withdrawal to offshore account can be an interesting way to get money out of SA without incurring Single Discretionary Allowance (SDA).</li>
-			<li>If CEX -> Luno exceeds 8.5% or so, credit card deposit on CEX and arbitrage on Luno is an option (their deposit fee is 3.5% compared to Bitstamps 5%) so anything north of that is profitable.</li>
-    			<li>Bitstamp -> CEX, withdrawal to offshore account, and deposit back into Bitstamp is a nice loop overseas without incurring SDA.</li>
-			<li>Bitstamp -> Luno seems to be stock standard highest margins. Watch for compression and lagg (Luno activity about 2-4 hours trailing overseas exchanges). Sweet spot is when overseas prices drop quickly, will add some indicators to predict this soon.</li>
-  		</ol>
-
-        </div>
+		{{#ifLunoCurrency}}
+			*ZAR exchange rate of {{ result.exchange }} used for calculations
+		{{/ifLunoCurrency}}
+	    </div>
     </div>
  
 </body>
